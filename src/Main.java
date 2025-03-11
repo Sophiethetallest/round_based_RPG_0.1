@@ -9,7 +9,6 @@ public class Main {
             player = createCharacter();
         }
         int weapon = 0, situation;
-        //Hero player = createCharacter();
         //player.lvl = 2;
 
         while (player.health > player.death && player.lvl < 4) { // entscheidung ob Kampf oder ein anderer random Encounter
