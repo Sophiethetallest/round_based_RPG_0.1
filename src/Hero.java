@@ -2,11 +2,12 @@
 class Hero {
     int health, str, intel, def, mana, lvl, death, exp, manadrain, gold, accuracy;
     String name;
-    boolean isMage, isWarrior;
+    boolean stun, isMage, isWarrior;
     Inventory inventory;
+    Floor floor;
 
     public Hero(String name, int health, int str, int intel, int def, int mana, int lvl,
-                int death, int manadrain, int gold, int accuracy, boolean isWarrior, boolean isMage) {
+                int death, int manadrain, int gold, int accuracy, boolean stun, boolean isWarrior, boolean isMage) {
         this.name = name;
         this.health = health;
         this.str = str;
@@ -18,9 +19,11 @@ class Hero {
         this.manadrain = manadrain;
         this.gold = gold;
         this.accuracy = accuracy;
+        this.stun = stun;
         this.isWarrior = isWarrior;
         this.isMage = isMage;
         this.inventory = new Inventory();
+        this.floor = new Floor();
     }
     public void printCharacter() {
         System.out.println("\nDeine Klasse ist: Magier\nDein Name ist: " + this.name + "\nGesundheit: " + this.health +

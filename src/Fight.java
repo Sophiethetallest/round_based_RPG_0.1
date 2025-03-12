@@ -4,7 +4,7 @@ import java.util.Scanner;
 public class Fight {
     private Scanner scan = new Scanner(System.in);
     private Random rand = new Random();
-    private int abilityNr, dmg, weapon, mobDmg, accurat, hardhit = 0;
+    private int abilityNr, dmg, weapon, mobDmg, accurat, hardhit = 0, fire = 0;
     private String input;
     private Abilities ability = new Abilities();
     private MageAbility mageAbility = new MageAbility();
@@ -17,17 +17,22 @@ public class Fight {
     }
 
     private void battleMenu(Hero player, Enemy enemy) {
-        System.out.print("\nAngreifen(1)?\nFähigkeit(2)?\nInventar(3)?\n");
-        abilityNr = scan.nextInt();
-        if (abilityNr == 1) {
-            attack(player, enemy);
-        } else if (abilityNr == 2) {
-            useAbilities(player, enemy);
-        } else if (abilityNr == 3) {
-            useInventory(player);
+        if (!player.stun) {
+            System.out.print("\nAngreifen(1)?\nFähigkeit(2)?\nInventar(3)?\n");
+            abilityNr = scan.nextInt();
+            if (abilityNr == 1) {
+                attack(player, enemy);
+            } else if (abilityNr == 2) {
+                useAbilities(player, enemy);
+            } else if (abilityNr == 3) {
+                useInventory(player);
+            }
+            enemyAttack(player, enemy);
+            levelUp(player, enemy);
+        } else {
+            System.out.print("Du bist betäubt\n");
+            player.stun = false;
         }
-        enemyAttack(player, enemy);
-        levelUp(player, enemy);
     }
 
     private void attack(Hero player, Enemy enemy) {
@@ -75,15 +80,34 @@ public class Fight {
     private void enemyAttack(Hero player, Enemy enemy) {
         if (enemy.mobLife > 0 && enemy.mobStun == 0) {
             mobDmg = Math.max(0, (rand.nextInt(3) + 1 + enemy.mobStrength - player.def));
+            if (enemy.name.equalsIgnoreCase("Hobgoblin")&& enemy.mobLife <= (enemy.mobLife/2)) {
+                mobDmg *= 2;
+                System.out.print("Der Hobgoblin haut zweimal hintereinander zu");
+            }
+            if (enemy.name.equalsIgnoreCase("Hochork")&& enemy.mobLife <= (enemy.mobLife/2)) {
+                fire = 3;
+                System.out.print("Der Hochork wirft einen Feuerball und du beginnst zu brennen");
+            }
+            if (enemy.name.equalsIgnoreCase("Schluchtentroll")&& enemy.mobLife <= (enemy.mobLife/2)) {
+                player.stun = true;
+                System.out.print("Der Schluchtentroll haut so fest zu, dass du für eine Runde betäubt bist");
+            }
             if (enemy.mobBlock > 0) {
-                System.out.print("Du hast keinen Schaden erlitten!\n");
+                System.out.print("Du konntest den Schaden vollständig blocken und hast keinen Schaden erlitten!\n");
+                --enemy.mobBlock;
             } else {
                 System.out.print("Du hast " + mobDmg + " Schaden erlitten!\n");
                 player.death += mobDmg;
+                if (fire > 0) {
+                    System.out.print("Du erleidest Verbrennungen und verlierst 1 Gesundheit");
+                    ++ player.death;
+                    -- fire;
+                }
             }
             System.out.print("Du hast noch " + (player.health - player.death) + " Gesundheit!\n");
+
         } else {
-            enemy.mobStun--;
+            --enemy.mobStun;
         }
     }
 
@@ -109,12 +133,12 @@ public class Fight {
             if (abilityNr == 1) attack(player, enemy);
             if (abilityNr == 2) useAbilities(player, enemy);
             if (abilityNr == 3) useInventory(player);
-            bossAttack(player, enemy);
+            ogreAttack(player, enemy);
         }
         player.lvl++;
     }
 
-    private void bossAttack(Hero player, Enemy enemy) {
+    private void ogreAttack(Hero player, Enemy enemy) {
         if (enemy.mobLife > 0 && enemy.mobStun == 0) {
             if (hardhit == 0) {
                 int bossAbility = rand.nextInt(10);

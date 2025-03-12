@@ -14,9 +14,7 @@ public class Enemy {
     public void enemyPresentation() {
         System.out.println("\nEin " + this.name + " erscheint!\n");
     }
-    public void enemyDeath() {
-        System.out.print("Der " + this.name + " ist tot!\nDu hast 1 Erfahrung erhalten\n");
+    public void enemyDeath() {System.out.print("Der " + this.name + " ist tot!\nDu hast 1 Erfahrung erhalten\n");}
 
-    }
 
 }

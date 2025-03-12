@@ -3,33 +3,51 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
         Random rand = new Random();
         Hero player = GameSave.promptLoadCharacter(); //laden eines evtl bestehenden Charackters
         if (player == null) { // Wenn es keine Savedatei eines bestehenden Charakters gibt, wird ein neuer erstellt
             player = createCharacter();
         }
         int weapon = 0, situation;
-        //Hero player = createCharacter();
         //player.lvl = 2;
 
-        while (player.health > player.death && player.lvl < 4) { // entscheidung ob Kampf oder ein anderer random Encounter
-            if (player.lvl < 3) {
-                situation = chooseEncounter();
-                if (situation >= 10 && situation <= 20) { //wenn die Zufallszal größer oder gleich 10 ist, bzw kleiner oder gleich 20 ist, wird ein Kampf getriggert
-                    Enemy enemy = generateEnemy(rand);
-                    enemy.enemyPresentation();
-                    new Fight(player, enemy);
-                } else {
-                    new Encounter().encounter(weapon, player);
+
+        while (player.health > player.death && player.lvl < 4) {// entscheidung ob Kampf oder ein anderer random Encounter
+            if (player.floor.floorNr < 19) {
+                player.floor.tilesNr = player.floor.FloorSize(); //Bestimmung der Größe der Ebene
+                int bossLevel = 5;
+                while (player.floor.tilesNr > 0) {
+                    if (player.floor.tilesNr == 1 && player.floor.floorNr == bossLevel) {
+                        Enemy enemy = generateMiniboss(bossLevel);
+                        enemy.enemyPresentation();
+                        new Fight(player, enemy);
+                        bossLevel += 5;
+                    } else {
+                        situation = chooseEncounter();
+                        if (situation >= 10 && situation <= 20) { //wenn die Zufallszahl größer oder gleich 10 ist, bzw kleiner oder gleich 20 ist, wird ein Kampf getriggert
+                            Enemy enemy = generateEnemy(rand);
+                            enemy.enemyPresentation();
+                            new Fight(player, enemy);
+                        } else {
+                            new Encounter().encounter(weapon, player);
+                        }
+                    }
+                    regenerateMana(player);
+                    GameSave.promptSaveCharacter(player); //Abfrage, ob User ihren Charakter speichern wollen
+                    player.floor.tilesDecrease(); //verkleinern der Ebene
                 }
-                regenerateMana(player);
-            } else {
+                player.floor.floorIncrease(); //Stockwerkszahl erhöhung
+                System.out.print("Ende des Stockwerkes erreicht. Nächster Stock: " + player.floor.floorNr + "\n");
+                System.out.println("Drücke Enter!\n");
+                String input = scan.nextLine();
+            } else{
                 new Fight(player, new Enemy("Ogerboss", 150, 8, 300, 0, 0)).Bossfight(player);
             }
-            GameSave.promptSaveCharacter(player); //Abfrage, ob User ihren Charakter speichern wollen
         }
         printGameResult(player);
     }
+
 
     private static Hero createCharacter() { // Methode mit der ein neuer Charakter, bzw ein Hero Object erstellt wird
         Scanner scan = new Scanner(System.in);
@@ -38,9 +56,9 @@ public class Main {
         int job = chooseJob();
         Hero player = (job == 1)
                 ? new Hero(name, 30, 1, 10, 1, 30, 0, 0,
-                            0, 30,90,false, true)
+                            0, 30,90,false, false, true)
                 : new Hero(name, 60, 10, 1, 2, 10, 0, 0,
-                            0, 10,90,true, false);
+                            0, 10,90, false,true, false);
         player.printCharacter();
         return player;
     }
@@ -67,6 +85,13 @@ public class Main {
         if (mob <= 4) return new Enemy("Goblin", 20, 2, 1, 0, 0);
         if (mob >= 7) return new Enemy("Ork", 30, 4, 2, 0, 0);
         return new Enemy("Troll", 40, 6, 3, 0, 0);
+    }
+
+    private static Enemy generateMiniboss(int floor) { //Methode zum Erstellen von Gegnern, bzw Objekten der Enemy Klasse
+        if (floor == 5) return new Enemy("Hobgoblin", 60, 4, 4, 0, 0);
+        if (floor == 10) return new Enemy("Hochork", 80, 6, 6, 0, 0);
+        if (floor == 15) return new Enemy("Schluchtentroll", 100, 8, 8, 0, 0);
+        return new Enemy("Maus", 1, 1, 100, 0, 0);
     }
 
     private static void regenerateMana(Hero player) { //Methode zum automatischen Regenerieren der Fähigkeiten Ressource des Charakters

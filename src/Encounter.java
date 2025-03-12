@@ -371,7 +371,7 @@ public class Encounter {
     }
 
     public void next() {
-        System.out.println("press enter!\n");
+        System.out.println("Drücke Enter!\n");
         input = scan.nextLine();
     }
 }
